@@ -1,0 +1,37 @@
+Total messages: 19
+Total words: 503
+Total letters: 2842
+Total media files: 3
+Total emojis: 5
+
+Messages per user: 
+Person 2: 14
+Person 1: 5
+
+Words per user: 
+Person 2: 322
+Person 1: 181
+
+Letters per user: 
+Person 2: 1806
+Person 1: 1036
+
+Average of letters per message: 
+Person 1: 207
+Person 2: 129
+
+Media files per user: 
+Person 2: 2
+Person 1: 1
+
+Most consecutive days chatting: 3
+Most consecutive days without messages: 31
+
+First message: 
+Person 1: 30/10/2022 9:00AM
+Person 2: 30/10/2022 9:04AM
+
+Last message: 
+Person 1: 6/12/2022 2:35PM
+Person 2: 6/12/2022 2:38PM
+
