@@ -1,5 +1,6 @@
 from emoji import emojize
 
+
 def writeData(chat, messagesNum, wordsNum, lettersNum, mediaNum, emojisNum, perUser, days, months, years, words, emojis, dayOfTheWeek, hourOfTheDay, firstMessage, lastMessage, maxWith, maxWithout):
     with open("Stats/General.txt", "a", encoding="utf8") as outputFileGeneral:
         outputFileGeneral.write(f"Total messages: {messagesNum}\n")
