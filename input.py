@@ -34,7 +34,7 @@ def mergeNewFiles(chat):
                         lineFound = True
                         continue
                     elif lineFound:
-                        if re.compile("([0-9]+)/([0-9]+)/([0-9]+), ([0-9]+):([0-9]+)\u202f(.+) - (.[^:]+): (.+)").match(line):
+                        if re.compile("([0-9]+)/([0-9]+)/([0-9]+), ([0-9]+):([0-9]+)\u202f(.{2}) - (.[^:]+): (.+)").match(line):
                             line = f"id{id}, " + line
                             id += 1
                         elif re.compile("([0-9]+)/([0-9]+)/([0-9]+), (.+) - (.+)").match(line):
@@ -51,7 +51,7 @@ def readData(chat):
 
     with open(f"Input/{chat}/{chat}.txt", encoding="utf8") as inputFile:
         for line in inputFile:
-            reg = re.compile("id([0-9]+), ([0-9]+)/([0-9]+)/([0-9]+), ([0-9]+):([0-9]+)\u202f(.+) - (.[^:]+): (.+)").match(line)
+            reg = re.compile("id([0-9]+), ([0-9]+)/([0-9]+)/([0-9]+), ([0-9]+):([0-9]+)\u202f(.{2}) - (.[^:]+): (.+)").match(line)
             if not reg:
                 data[-1]["message"] += '\n' + line.strip()
                 continue
