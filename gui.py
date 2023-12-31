@@ -14,14 +14,24 @@ class MyApp(QWidget):
         self.setFixedSize(QSize(800, 600))
 
         self.allTabs = QTabWidget()
+        self.tabWidgets = {
+            "Input": self.initInputTab,
+            "General": self.initGeneralTab,
+            "Messages": self.initMessagesTab,
+            "Words": self.initWordsTab,
+            "Emojis": self.initEmojisTab
+        }
 
-        self.tabInput = QWidget()
-        self.tabGeneral = QWidget()
-        self.tabMessages = QWidget()
-        self.tabWords = QWidget()
-        self.tabEmojis = QWidget()
+        for tabName, initMethod in self.tabWidgets.items():
+            tab = QWidget()
+            initMethod(tab)
+            self.allTabs.addTab(tab, tabName)
 
-        # tabInput
+        layout = QVBoxLayout()
+        layout.addWidget(self.allTabs)
+        self.setLayout(layout)
+
+    def initInputTab(self, tabInput):
         self.chatNameLabel = QLabel("Unesite ime chat-a: ")
         self.chatNameLabel.setFixedSize(QSize(170, 40))
         self.chatNameLabel.setAlignment(Qt.AlignCenter)
@@ -49,44 +59,34 @@ class MyApp(QWidget):
         self.runBox = QHBoxLayout()
         self.runBox.addWidget(self.runButton, alignment=Qt.AlignCenter)
 
-        self.tabInputLayout = QVBoxLayout(self.tabInput)
+        self.tabInputLayout = QVBoxLayout(tabInput)
         self.tabInputLayout.addLayout(self.chatNameInputBox)
         self.tabInputLayout.addLayout(self.importFileBox)
         self.tabInputLayout.addLayout(self.runBox)
 
-        # tabGeneral
+    def initGeneralTab(self, tabGeneral):
         self.textEditGeneral = QTextEdit()
         self.textEditGeneral.setReadOnly(True)
-        self.tabGeneralLayout = QVBoxLayout(self.tabGeneral)
+        self.tabGeneralLayout = QVBoxLayout(tabGeneral)
         self.tabGeneralLayout.addWidget(self.textEditGeneral)
 
-        # tabMessages
+    def initMessagesTab(self, tabMessages):
         self.textEditMessages = QTextEdit()
         self.textEditMessages.setReadOnly(True)
-        self.tabMessagesLayout = QVBoxLayout(self.tabMessages)
+        self.tabMessagesLayout = QVBoxLayout(tabMessages)
         self.tabMessagesLayout.addWidget(self.textEditMessages)
 
-        # tabWords
+    def initWordsTab(self, tabWords):
         self.textEditWords = QTextEdit()
         self.textEditWords.setReadOnly(True)
-        self.tabWordslLayout = QVBoxLayout(self.tabWords)
+        self.tabWordslLayout = QVBoxLayout(tabWords)
         self.tabWordslLayout.addWidget(self.textEditWords)
 
-        # tabEmojis
+    def initEmojisTab(self, tabEmojis):
         self.textEditEmojis = QTextEdit()
         self.textEditEmojis.setReadOnly(True)
-        self.tabEmojisLayout = QVBoxLayout(self.tabEmojis)
+        self.tabEmojisLayout = QVBoxLayout(tabEmojis)
         self.tabEmojisLayout.addWidget(self.textEditEmojis)
-
-        self.allTabs.addTab(self.tabInput, "Input")
-        self.allTabs.addTab(self.tabGeneral, "General")
-        self.allTabs.addTab(self.tabMessages, "Messages")
-        self.allTabs.addTab(self.tabWords, "Words")
-        self.allTabs.addTab(self.tabEmojis, "Emojis")
-
-        layout = QVBoxLayout()
-        layout.addWidget(self.allTabs)
-        self.setLayout(layout)
 
     def openFile(self):
         options = QFileDialog.Options()
