@@ -2,13 +2,13 @@ from PySide6.QtWidgets import QApplication, QFileDialog, QVBoxLayout, QPushButto
     QHBoxLayout, QTabWidget, QTextEdit
 from PySide6.QtCore import QSize, Qt
 import os
+import re
 from main import work
 
 
 class MyApp(QWidget):
     def __init__(self):
         super().__init__()
-        self.numOfFiles = {}
 
         self.setWindowTitle("WhatsApp Stats")
         self.setFixedSize(QSize(800, 600))
@@ -93,15 +93,20 @@ class MyApp(QWidget):
         options |= QFileDialog.ReadOnly
         fileName, _ = QFileDialog.getOpenFileName(self, "Import File", "D:", "Files (*.txt)", options=options)
         if fileName:
-            with open(fileName, 'r') as f:
+            with open(fileName, 'r', encoding="utf8") as f:
                 data = f.read()
                 chat = self.chatNameInput.text()
                 if not os.path.exists(f"Input/{chat}"):
                     os.mkdir(f"Input/{chat}")
-                    self.numOfFiles[chat] = 0
-                with open(f"Input/{chat}/{chat}{self.numOfFiles[chat]}.txt", 'a') as f2:
+                    numOfFiles = 1
+                else:
+                    numOfFiles = 1
+                    for filename in os.listdir(f"Input/{chat}"):
+                        num = int(re.compile(f"{chat}([0-9]+)").match(filename).group(1))
+                        if num >= numOfFiles:
+                            numOfFiles = num + 1
+                with open(f"Input/{chat}/{chat}{numOfFiles}.txt", 'a', encoding="utf8") as f2:
                     f2.write(data)
-                self.numOfFiles[chat] += 1
 
     def work(self):
         chat = self.chatNameInput.text()
