@@ -1,6 +1,6 @@
 Total messages: 19
-Total words: 503
-Total letters: 2842
+Total words: 555
+Total letters: 3144
 Total media files: 3
 Total emojis: 5
 
@@ -9,16 +9,16 @@ Person 2: 14
 Person 1: 5
 
 Words per user: 
-Person 2: 322
+Person 2: 374
 Person 1: 181
 
 Letters per user: 
-Person 2: 1806
+Person 2: 2108
 Person 1: 1036
 
 Average of letters per message: 
 Person 1: 207
-Person 2: 129
+Person 2: 151
 
 Media files per user: 
 Person 2: 2

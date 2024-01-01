@@ -2,9 +2,9 @@ from PySide6.QtWidgets import QApplication, QFileDialog, QVBoxLayout, QPushButto
     QHBoxLayout, QTabWidget, QTextEdit, QListWidget
 from PySide6.QtCore import QSize, Qt
 import os
-import re
-from main import work
 
+from main import work
+from input import addToDatabase
 
 class MyApp(QWidget):
     def __init__(self):
@@ -33,7 +33,7 @@ class MyApp(QWidget):
         self.setLayout(layout)
 
     def initInputTab(self, tabInput):
-        self.chatNameLabel = QLabel("Unesite ime chat-a: ")
+        self.chatNameLabel = QLabel("Enter chat name: ")
         self.chatNameLabel.setFixedSize(QSize(170, 40))
         self.chatNameLabel.setAlignment(Qt.AlignCenter)
 
@@ -64,7 +64,7 @@ class MyApp(QWidget):
 
         self.runChatsList = QListWidget()
         for chat in os.listdir("Input"):
-            self.runChatsList.addItem(chat)
+            self.runChatsList.addItem(chat[:-3])
         self.runChatsList.setStyleSheet("QListWidget::item { min-height: 50px; }")
 
         self.tabRunLayout = QVBoxLayout(tabRun)
@@ -103,18 +103,11 @@ class MyApp(QWidget):
             with open(fileName, 'r', encoding="utf8") as f:
                 data = f.read()
                 chat = self.chatNameInput.text()
-                if not os.path.exists(f"Input/{chat}"):
-                    os.mkdir(f"Input/{chat}")
-                    numOfFiles = 1
+                if not os.path.exists(f"Input/{chat}.db"):
                     self.runChatsList.addItem(chat)
+                    addToDatabase(chat, data, True)
                 else:
-                    numOfFiles = 1
-                    for filename in os.listdir(f"Input/{chat}"):
-                        num = int(re.compile(f"{chat}([0-9]+)").match(filename).group(1))
-                        if num >= numOfFiles:
-                            numOfFiles = num + 1
-                with open(f"Input/{chat}/{chat}{numOfFiles}.txt", 'a', encoding="utf8") as f2:
-                    f2.write(data)
+                    addToDatabase(chat, data, False)
 
     def work(self):
         chat = self.runChatsList.selectedItems()[0].text()

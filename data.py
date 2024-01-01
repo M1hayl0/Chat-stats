@@ -2,15 +2,23 @@ import emoji
 from emoji import demojize
 import datetime
 
+from sql import *
 
-def dataProcessing(data):
+def dataProcessing(chat):
     messagesNum, wordsNum, lettersNum, mediaNum, emojisNum = 0, 0, 0, 0, 0
     perUser, days, months, years, words, emojis = {}, {}, {}, {}, {}, {}
     dayOfTheWeek, hourOfTheDay = [0] * 7, [0] * 24
     firstMessage, lastMessage = {}, {}
     dates, maxWith, maxWithout = [], 0, 0
 
-    for mes in data:
+    database = connect(chat)
+    for values in selectAllMessages(database):
+        mes = {}
+        keys = ["id", "month", "day", "year", "hour", "minute", "AM/PM", "person", "message"]
+        for i in range(len(keys)):
+            mes[keys[i]] = values[i]
+        mes["year"] = "20" + mes["year"]
+
         messagesNum += 1
         messageSplit = mes["message"].split()
         if mes["message"] != "<Media omitted>":
@@ -33,7 +41,6 @@ def dataProcessing(data):
                         emojis[e] += 1
         else:
             mediaNum += 1
-
 
         string = mes['year']
         if string not in years:
@@ -107,5 +114,7 @@ def dataProcessing(data):
             cur = 1
     if cur > maxWith:
         maxWith = cur
+
+    disconnect(database)
 
     return messagesNum, wordsNum, lettersNum, mediaNum, emojisNum, perUser, days, months, years, words, emojis, dayOfTheWeek, hourOfTheDay, firstMessage, lastMessage, maxWith, maxWithout

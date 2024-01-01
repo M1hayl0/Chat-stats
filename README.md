@@ -1,4 +1,4 @@
-# WhatsApp-stats
+# WhatsApp-stats v0.2
 Enter the chat on WhatsApp, press 3 dots -> "More" -> "Export chat" -> "Without media" and send .txt file to yourself somewhere where you can download it from your pc.
 
 In the "Input" folder in the project make a folder for that chat and put the exported file there. Exported files must be named like the name of the folder + 1/2/3... 
