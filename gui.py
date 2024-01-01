@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QApplication, QFileDialog, QVBoxLayout, QPushButton, QWidget, QLineEdit, QLabel, \
-    QHBoxLayout, QTabWidget, QTextEdit
+    QHBoxLayout, QTabWidget, QTextEdit, QListWidget
 from PySide6.QtCore import QSize, Qt
 import os
 import re
@@ -16,6 +16,7 @@ class MyApp(QWidget):
         self.allTabs = QTabWidget()
         self.tabWidgets = {
             "Input": self.initInputTab,
+            "Run": self.initRunTab,
             "General": self.initGeneralTab,
             "Messages": self.initMessagesTab,
             "Words": self.initWordsTab,
@@ -52,17 +53,23 @@ class MyApp(QWidget):
         self.importFileBox = QHBoxLayout()
         self.importFileBox.addWidget(self.importFileButton, alignment=Qt.AlignCenter)
 
+        self.tabInputLayout = QVBoxLayout(tabInput)
+        self.tabInputLayout.addLayout(self.chatNameInputBox)
+        self.tabInputLayout.addLayout(self.importFileBox)
+
+    def initRunTab(self, tabRun):
         self.runButton = QPushButton('Run')
         self.runButton.setFixedSize(QSize(100, 50))
         self.runButton.clicked.connect(self.work)
 
-        self.runBox = QHBoxLayout()
-        self.runBox.addWidget(self.runButton, alignment=Qt.AlignCenter)
+        self.runChatsList = QListWidget()
+        for chat in os.listdir("Input"):
+            self.runChatsList.addItem(chat)
+        self.runChatsList.setStyleSheet("QListWidget::item { min-height: 50px; }")
 
-        self.tabInputLayout = QVBoxLayout(tabInput)
-        self.tabInputLayout.addLayout(self.chatNameInputBox)
-        self.tabInputLayout.addLayout(self.importFileBox)
-        self.tabInputLayout.addLayout(self.runBox)
+        self.tabRunLayout = QVBoxLayout(tabRun)
+        self.tabRunLayout.addWidget(self.runChatsList)
+        self.tabRunLayout.addWidget(self.runButton, alignment=Qt.AlignCenter)
 
     def initGeneralTab(self, tabGeneral):
         self.textEditGeneral = QTextEdit()
@@ -99,6 +106,7 @@ class MyApp(QWidget):
                 if not os.path.exists(f"Input/{chat}"):
                     os.mkdir(f"Input/{chat}")
                     numOfFiles = 1
+                    self.runChatsList.addItem(chat)
                 else:
                     numOfFiles = 1
                     for filename in os.listdir(f"Input/{chat}"):
@@ -109,7 +117,7 @@ class MyApp(QWidget):
                     f2.write(data)
 
     def work(self):
-        chat = self.chatNameInput.text()
+        chat = self.runChatsList.selectedItems()[0].text()
         work(chat)
         with open("Stats/General.txt", "r", encoding="utf8") as outputFileGeneral:
             data = outputFileGeneral.read()
