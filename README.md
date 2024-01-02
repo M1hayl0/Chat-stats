@@ -7,4 +7,4 @@ You can export only 40k messages from WhatsApp. This program can work with more 
 For example, you exported 35k messages a month ago and stored them in that folder. Last month you had 10k new messages. When you export a new file, it will have 40k messages. When you put it in the input folder with the old file and run the program, it will work with 45k messages.
 If you have more input files, THEY MUST OVERLAP.
 
-There is one border case that will not work. For example, if the last 10 messages from the first input file are the same and are sent in the same minute from the same person, and also the first 10 messages from the second input file, you can't know if there should be 11 or 20 messages like that, so don't spam the same messages if you don't have to. :) 
+There is one edge case that will not work. For example, if the last 10 messages from the first input file are the same and are sent in the same minute from the same person, and also the first 10 messages from the second input file, you can't know if there should be 11 or 20 messages like that, so don't spam the same messages if you don't have to. :) 
