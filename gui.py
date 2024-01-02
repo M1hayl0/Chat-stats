@@ -1,6 +1,8 @@
+from PySide6 import QtCore
 from PySide6.QtGui import QColor, QFont
-from PySide6.QtWidgets import QApplication, QFileDialog, QVBoxLayout, QPushButton, QWidget, QLineEdit, QLabel, QHBoxLayout, QTabWidget, QTextEdit, QListWidget
-from PySide6.QtCore import QSize, Qt
+from PySide6.QtWidgets import QApplication, QFileDialog, QVBoxLayout, QPushButton, QWidget, QLineEdit, QLabel, \
+    QHBoxLayout, QTabWidget, QTextEdit, QListWidget, QMessageBox, QDialog
+from PySide6.QtCore import QSize, Qt, QThread, Signal
 import os
 
 from data import dataProcessing
@@ -14,6 +16,7 @@ class MyApp(QWidget):
         self.setWindowTitle("WhatsApp Stats")
         self.setFixedSize(QSize(800, 600))
         self.setStyleSheet("background-color: #25d366;")
+        self.initDialog()
 
         self.allTabs = QTabWidget()
         self.allTabs.setFont(QFont("Helvetica", 10))
@@ -68,7 +71,7 @@ class MyApp(QWidget):
     def initRunTab(self, tabRun):
         self.runButton = QPushButton('Run')
         self.runButton.setFixedSize(QSize(100, 50))
-        self.runButton.clicked.connect(self.work)
+        self.runButton.clicked.connect(self.dataProcessing)
         self.runButton.setFont(QFont("Helvetica", 16))
         self.runButton.setStyleSheet("color: #FFFFFF; background-color: #25d366;")
 
@@ -131,6 +134,31 @@ class MyApp(QWidget):
         self.tabEmojisLayout = QVBoxLayout(tabEmojis)
         self.tabEmojisLayout.addWidget(self.textEditEmojis)
 
+    def initDialog(self):
+        self.importDialog = QDialog(self)
+        self.importDialog.setWindowFlags(self.importDialog.windowFlags() & ~Qt.WindowCloseButtonHint)
+        self.importDialog.setFixedSize(QSize(200, 100))
+        self.importDialog.setStyleSheet("background-color: #ece5dd;")
+        self.importDialog.setWindowTitle("WhatsApp Stats")
+        importDialogLayout = QVBoxLayout()
+        self.importDialogText = QLabel("Importing data...")
+        self.importDialogText.setFont(QFont("Helvetica", 12))
+        self.importDialogText.setStyleSheet("color: #075e54")
+        importDialogLayout.addWidget(self.importDialogText, alignment=Qt.AlignCenter)
+        self.importDialog.setLayout(importDialogLayout)
+
+        self.runDialog = QDialog(self)
+        self.runDialog.setWindowFlags(self.runDialog.windowFlags() & ~Qt.WindowCloseButtonHint)
+        self.runDialog.setFixedSize(QSize(200, 100))
+        self.runDialog.setStyleSheet("background-color: #ece5dd;")
+        self.runDialog.setWindowTitle("WhatsApp Stats")
+        runDialogLayout = QVBoxLayout()
+        self.runDialogText = QLabel("Data processing...")
+        self.runDialogText.setFont(QFont("Helvetica", 12))
+        self.runDialogText.setStyleSheet("color: #075e54")
+        runDialogLayout.addWidget(self.runDialogText, alignment=Qt.AlignCenter)
+        self.runDialog.setLayout(runDialogLayout)
+
     def openFile(self):
         options = QFileDialog.Options()
         options |= QFileDialog.ReadOnly
@@ -140,15 +168,31 @@ class MyApp(QWidget):
                 data = f.read()
                 chat = self.chatNameInput.text()
                 if not os.path.exists(f"Input/{chat}.db"):
-                    self.runChatsList.addItem(chat)
-                    self.updateItemColors()
-                    addToDatabase(chat, data, True)
+                    self.dbWorker = addToDatabaseWorker(chat, data, True)
                 else:
-                    addToDatabase(chat, data, False)
+                    self.removeFromChatList(chat)
+                    self.dbWorker = addToDatabaseWorker(chat, data, False)
+                self.dbWorker.finished.connect(self.addToChatList)
+                self.dbWorker.start()
+                self.importDialog.show()
 
-    def work(self):
+    def addToChatList(self, chat):
+        self.importDialog.close()
+        self.runChatsList.addItem(chat)
+        self.updateItemColors()
+
+    def removeFromChatList(self, chat):
+        item = self.runChatsList.findItems(chat, QtCore.Qt.MatchExactly)
+        self.runChatsList.takeItem(self.runChatsList.row(item[0]))
+
+    def dataProcessing(self):
         chat = self.runChatsList.selectedItems()[0].text()
-        dataProcessing(chat)
+        self.worker = dataProcessingWorker(chat)
+        self.worker.finished.connect(self.output)
+        self.worker.start()
+        self.runDialog.show()
+
+    def output(self, chat):
         with open(f"Output/{chat}/General.txt", "r", encoding="utf8") as outputFileGeneral:
             data = outputFileGeneral.read()
             self.textEditGeneral.setText(data)
@@ -161,3 +205,30 @@ class MyApp(QWidget):
         with open(f"Output/{chat}/Emojis.txt", "r", encoding="utf8") as outputFileEmojis:
             data = outputFileEmojis.read()
             self.textEditEmojis.setText(data)
+        self.runDialog.close()
+
+
+class dataProcessingWorker(QThread):
+    finished = Signal(str)
+
+    def __init__(self, chat):
+        super().__init__()
+        self.chat = chat
+
+    def run(self):
+        dataProcessing(self.chat)
+        self.finished.emit(self.chat)
+
+
+class addToDatabaseWorker(QThread):
+    finished = Signal(str)
+
+    def __init__(self, chat, data, first):
+        super().__init__()
+        self.chat = chat
+        self.data = data
+        self.first = first
+
+    def run(self):
+        addToDatabase(self.chat, self.data, self.first)
+        self.finished.emit(self.chat)
