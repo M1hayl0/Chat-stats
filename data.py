@@ -1,10 +1,17 @@
 import emoji
 from emoji import demojize
 import datetime
+import os
 
 from sql import *
+from output import writeData
+
 
 def dataProcessing(chat):
+    outputFiles = [f"Output/{chat}/General.txt", f"Output/{chat}/Messages.txt", f"Output/{chat}/Words.txt", f"Output/{chat}/Emojis.txt"]
+    if all(os.path.exists(file) for file in outputFiles):
+        return
+
     messagesNum, wordsNum, lettersNum, mediaNum, emojisNum = 0, 0, 0, 0, 0
     perUser, days, months, years, words, emojis = {}, {}, {}, {}, {}, {}
     dayOfTheWeek, hourOfTheDay = [0] * 7, [0] * 24
@@ -117,4 +124,4 @@ def dataProcessing(chat):
 
     disconnect(database)
 
-    return messagesNum, wordsNum, lettersNum, mediaNum, emojisNum, perUser, days, months, years, words, emojis, dayOfTheWeek, hourOfTheDay, firstMessage, lastMessage, maxWith, maxWithout
+    writeData(chat, messagesNum, wordsNum, lettersNum, mediaNum, emojisNum, perUser, days, months, years, words, emojis, dayOfTheWeek, hourOfTheDay, firstMessage, lastMessage, maxWith, maxWithout)

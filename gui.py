@@ -1,10 +1,11 @@
-from PySide6.QtWidgets import QApplication, QFileDialog, QVBoxLayout, QPushButton, QWidget, QLineEdit, QLabel, \
-    QHBoxLayout, QTabWidget, QTextEdit, QListWidget
+from PySide6.QtGui import QColor, QFont
+from PySide6.QtWidgets import QApplication, QFileDialog, QVBoxLayout, QPushButton, QWidget, QLineEdit, QLabel, QHBoxLayout, QTabWidget, QTextEdit, QListWidget
 from PySide6.QtCore import QSize, Qt
 import os
 
-from main import work
+from data import dataProcessing
 from input import addToDatabase
+
 
 class MyApp(QWidget):
     def __init__(self):
@@ -12,10 +13,12 @@ class MyApp(QWidget):
 
         self.setWindowTitle("WhatsApp Stats")
         self.setFixedSize(QSize(800, 600))
+        self.setStyleSheet("background-color: #25d366;")
 
         self.allTabs = QTabWidget()
+        self.allTabs.setFont(QFont("Helvetica", 10))
         self.tabWidgets = {
-            "Input": self.initInputTab,
+            "Import": self.initInputTab,
             "Run": self.initRunTab,
             "General": self.initGeneralTab,
             "Messages": self.initMessagesTab,
@@ -25,6 +28,7 @@ class MyApp(QWidget):
 
         for tabName, initMethod in self.tabWidgets.items():
             tab = QWidget()
+            tab.setStyleSheet("background-color: #ece5dd;")
             initMethod(tab)
             self.allTabs.addTab(tab, tabName)
 
@@ -34,21 +38,25 @@ class MyApp(QWidget):
 
     def initInputTab(self, tabInput):
         self.chatNameLabel = QLabel("Enter chat name: ")
-        self.chatNameLabel.setFixedSize(QSize(170, 40))
+        self.chatNameLabel.setFixedSize(QSize(250, 50))
+        self.chatNameLabel.setFont(QFont("Helvetica", 16))
+        self.chatNameLabel.setStyleSheet("color: #075e54;")
         self.chatNameLabel.setAlignment(Qt.AlignCenter)
 
         self.chatNameInput = QLineEdit()
-        self.chatNameInput.setPlaceholderText("person")
-        self.chatNameInput.setFixedSize(QSize(170, 40))
-        self.chatNameInput.setAlignment(Qt.AlignCenter)
+        self.chatNameInput.setFixedSize(QSize(250, 50))
+        self.chatNameInput.setFont(QFont("Helvetica", 16))
+        self.chatNameInput.setStyleSheet("color: #FFFFFF; background-color: #25d366;")
 
         self.chatNameInputBox = QHBoxLayout()
         self.chatNameInputBox.addWidget(self.chatNameLabel, alignment=Qt.AlignCenter)
         self.chatNameInputBox.addWidget(self.chatNameInput, alignment=Qt.AlignCenter)
 
-        self.importFileButton = QPushButton('Import Chat')
-        self.importFileButton.setFixedSize(QSize(100, 50))
+        self.importFileButton = QPushButton("Import Chat")
+        self.importFileButton.setFixedSize(QSize(150, 60))
         self.importFileButton.clicked.connect(self.openFile)
+        self.importFileButton.setFont(QFont("Helvetica", 16))
+        self.importFileButton.setStyleSheet("color: #FFFFFF; background-color: #25d366;")
 
         self.importFileBox = QHBoxLayout()
         self.importFileBox.addWidget(self.importFileButton, alignment=Qt.AlignCenter)
@@ -61,37 +69,65 @@ class MyApp(QWidget):
         self.runButton = QPushButton('Run')
         self.runButton.setFixedSize(QSize(100, 50))
         self.runButton.clicked.connect(self.work)
+        self.runButton.setFont(QFont("Helvetica", 16))
+        self.runButton.setStyleSheet("color: #FFFFFF; background-color: #25d366;")
 
         self.runChatsList = QListWidget()
+        self.runChatsList.setFont(QFont("Helvetica", 12))
         for chat in os.listdir("Input"):
             self.runChatsList.addItem(chat[:-3])
-        self.runChatsList.setStyleSheet("QListWidget::item { min-height: 50px; }")
+
+        for i in range(self.runChatsList.count()):
+            self.runChatsList.item(i).setBackground(QColor('#25d366'))
+
+        self.runChatsList.setStyleSheet("""
+            QListWidget::item { min-height: 50px; color: #FFFFFF; };
+        """)
+        self.runChatsList.itemSelectionChanged.connect(self.updateItemColors)
 
         self.tabRunLayout = QVBoxLayout(tabRun)
         self.tabRunLayout.addWidget(self.runChatsList)
         self.tabRunLayout.addWidget(self.runButton, alignment=Qt.AlignCenter)
 
+    def updateItemColors(self):
+        for i in range(self.runChatsList.count()):
+            item = self.runChatsList.item(i)
+            if item.isSelected():
+                item.setBackground(QColor('#075e54'))
+                item.setFont(QFont("Helvetica", 15))
+            else:
+                item.setBackground(QColor('#25d366'))
+                item.setFont(QFont("Helvetica", 12))
+
     def initGeneralTab(self, tabGeneral):
         self.textEditGeneral = QTextEdit()
         self.textEditGeneral.setReadOnly(True)
+        self.textEditGeneral.setFont(QFont("Helvetica", 12))
+        self.textEditGeneral.setStyleSheet("color: #075e54;")
         self.tabGeneralLayout = QVBoxLayout(tabGeneral)
         self.tabGeneralLayout.addWidget(self.textEditGeneral)
 
     def initMessagesTab(self, tabMessages):
         self.textEditMessages = QTextEdit()
         self.textEditMessages.setReadOnly(True)
+        self.textEditMessages.setFont(QFont("Helvetica", 12))
+        self.textEditMessages.setStyleSheet("color: #075e54;")
         self.tabMessagesLayout = QVBoxLayout(tabMessages)
         self.tabMessagesLayout.addWidget(self.textEditMessages)
 
     def initWordsTab(self, tabWords):
         self.textEditWords = QTextEdit()
         self.textEditWords.setReadOnly(True)
+        self.textEditWords.setFont(QFont("Helvetica", 12))
+        self.textEditWords.setStyleSheet("color: #075e54;")
         self.tabWordslLayout = QVBoxLayout(tabWords)
         self.tabWordslLayout.addWidget(self.textEditWords)
 
     def initEmojisTab(self, tabEmojis):
         self.textEditEmojis = QTextEdit()
         self.textEditEmojis.setReadOnly(True)
+        self.textEditEmojis.setFont(QFont("Helvetica", 12))
+        self.textEditEmojis.setStyleSheet("color: #075e54;")
         self.tabEmojisLayout = QVBoxLayout(tabEmojis)
         self.tabEmojisLayout.addWidget(self.textEditEmojis)
 
@@ -105,22 +141,23 @@ class MyApp(QWidget):
                 chat = self.chatNameInput.text()
                 if not os.path.exists(f"Input/{chat}.db"):
                     self.runChatsList.addItem(chat)
+                    self.updateItemColors()
                     addToDatabase(chat, data, True)
                 else:
                     addToDatabase(chat, data, False)
 
     def work(self):
         chat = self.runChatsList.selectedItems()[0].text()
-        work(chat)
-        with open("Stats/General.txt", "r", encoding="utf8") as outputFileGeneral:
+        dataProcessing(chat)
+        with open(f"Output/{chat}/General.txt", "r", encoding="utf8") as outputFileGeneral:
             data = outputFileGeneral.read()
             self.textEditGeneral.setText(data)
-        with open("Stats/Messages.txt", "r", encoding="utf8") as outputFileMessages:
+        with open(f"Output/{chat}/Messages.txt", "r", encoding="utf8") as outputFileMessages:
             data = outputFileMessages.read()
             self.textEditMessages.setText(data)
-        with open("Stats/Words.txt", "r", encoding="utf8") as outputFileWords:
+        with open(f"Output/{chat}/Words.txt", "r", encoding="utf8") as outputFileWords:
             data = outputFileWords.read()
             self.textEditWords.setText(data)
-        with open("Stats/Emojis.txt", "r", encoding="utf8") as outputFileEmojis:
+        with open(f"Output/{chat}/Emojis.txt", "r", encoding="utf8") as outputFileEmojis:
             data = outputFileEmojis.read()
             self.textEditEmojis.setText(data)

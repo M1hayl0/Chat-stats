@@ -1,8 +1,12 @@
 from emoji import emojize
+import os
 
 
 def writeData(chat, messagesNum, wordsNum, lettersNum, mediaNum, emojisNum, perUser, days, months, years, words, emojis, dayOfTheWeek, hourOfTheDay, firstMessage, lastMessage, maxWith, maxWithout):
-    with open("Stats/General.txt", "a", encoding="utf8") as outputFileGeneral:
+    if not os.path.exists(f"Output/{chat}"):
+        os.mkdir(f"Output/{chat}")
+
+    with open(f"Output/{chat}/General.txt", "a", encoding="utf8") as outputFileGeneral:
         outputFileGeneral.write(f"Total messages: {messagesNum}\n")
         outputFileGeneral.write(f"Total words: {wordsNum}\n")
         outputFileGeneral.write(f"Total letters: {lettersNum}\n")
@@ -43,7 +47,7 @@ def writeData(chat, messagesNum, wordsNum, lettersNum, mediaNum, emojisNum, perU
             outputFileGeneral.write(f"{key}: {value}\n")
         outputFileGeneral.write("\n")
 
-    with open("Stats/Messages.txt", "a", encoding="utf8") as outputFileMessages:
+    with open(f"Output/{chat}/Messages.txt", "a", encoding="utf8") as outputFileMessages:
         outputFileMessages.write("Messages per year: \n")
         [outputFileMessages.write(f"{key}: {value}\n") for key, value in years.items()]
         outputFileMessages.write("\n")
@@ -79,7 +83,7 @@ def writeData(chat, messagesNum, wordsNum, lettersNum, mediaNum, emojisNum, perU
                 outputFileMessages.write(f"{(i + 11) % 12 + 1}PM: {hourOfTheDay[i]}\n")
         outputFileMessages.write("\n")
 
-    with open("Stats/Words.txt", "a", encoding="utf8") as outputFileWords:
+    with open(f"Output/{chat}/Words.txt", "a", encoding="utf8") as outputFileWords:
         outputFileWords.write("Number of words: ")
         last = 0
         for key, value in sorted(words.items(), key=lambda x: x[1], reverse=True):
@@ -111,7 +115,7 @@ def writeData(chat, messagesNum, wordsNum, lettersNum, mediaNum, emojisNum, perU
             outputFileWords.write(f"{key1}: {len(value1[6].items())}\n")
         outputFileWords.write("\n")
 
-    with open("Stats/Emojis.txt", "a", encoding="utf8") as outputFileEmojis:
+    with open(f"Output/{chat}/Emojis.txt", "a", encoding="utf8") as outputFileEmojis:
         outputFileEmojis.write("Emojis: \n")
         for key, value in sorted(emojis.items(), key=lambda x: x[1], reverse=True):
             outputFileEmojis.write(f"{emojize(key)} : {value}\n")

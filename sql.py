@@ -58,7 +58,6 @@ def selectAllMessages(database):
     try:
         cursor = database.cursor()
         cursor.execute(sql)
-        # print(cursor.fetchall())
         return cursor.fetchall()
     except sqlite3.Error as e:
         print(e)
@@ -73,6 +72,7 @@ def selectLastMessage(database):
     except sqlite3.Error as e:
         print(e)
 
+
 def selectLastMessageText(database):
     sql = "SELECT message FROM Messages ORDER BY IdMes DESC LIMIT 1"
     try:
@@ -82,6 +82,7 @@ def selectLastMessageText(database):
     except sqlite3.Error as e:
         print(e)
 
+
 def updateLastMessage(database, message):
     sql = "UPDATE Messages SET message = ? WHERE IdMes = (SELECT IdMes FROM Messages ORDER BY IdMes DESC LIMIT 1)"
     try:
@@ -90,5 +91,4 @@ def updateLastMessage(database, message):
             cursor.execute(sql, (message, ))
     except sqlite3.Error as e:
         print(e)
-
 
