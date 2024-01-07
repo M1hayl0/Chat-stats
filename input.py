@@ -29,7 +29,9 @@ def addToDatabase(chat, data, first):
                     lineFound = True
                     continue
                 elif not reg and re.compile("([0-9]+)/([0-9]+)/([0-9]+), (.+) - (.+)").match(line):
-                    # Skip lines like this: 10/30/22, 9:08 AM - Person1 added Person2
+                    # Skip lines like this:
+                    # 10/30/22, 9:08 AM - Person1 added Person2
+                    # 12/15/22, 5:46 PM - Messages and calls are end-to-end encrypted. No one outside of this chat, not even WhatsApp, can read or listen to them. Tap to learn more.
                     continue
                 elif not reg:
                     # When a message has more lines
