@@ -1,28 +1,28 @@
-Total messages: 28
-Total words: 642
-Total letters: 4246
-Total media files: 3
+Total messages: 31
+Total words: 657
+Total letters: 4341
+Total media files: 4
 Total emojis: 7
 
 Messages per user: 
 Person 2: 18
-Person 1: 10
+Person 1: 13
 
 Words per user: 
 Person 2: 402
-Person 1: 240
+Person 1: 255
 
 Letters per user: 
 Person 2: 2664
-Person 1: 1582
+Person 1: 1677
 
 Average of letters per message: 
-Person 1: 158
 Person 2: 148
+Person 1: 129
 
 Media files per user: 
+Person 1: 2
 Person 2: 2
-Person 1: 1
 
 Most consecutive days chatting: 3
 Most consecutive days without messages: 28
