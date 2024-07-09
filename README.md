@@ -1,4 +1,4 @@
-# Chat-stats v0.6
+# Chat-stats v0.7
 
 WhatsApp:
 Enter the chat on WhatsApp, press 3 dots -> "More" -> "Export chat" -> "Without media" and send .txt file to yourself somewhere where you can download it from your PC.
