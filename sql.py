@@ -23,12 +23,13 @@ def createTable(database):
             IdMes INTEGER PRIMARY KEY AUTOINCREMENT,
             month VARCHAR(2) NOT NULL,
             day VARCHAR(2) NOT NULL,
-            year VARCHAR(4) NOT NULL,
+            year VARCHAR(2) NOT NULL,
             hour VARCHAR(2) NOT NULL,
             minute VARCHAR(2) NOT NULL,
             AMPM VARCHAR(2) NOT NULL,
             person VARCHAR(100) NOT NULL,
-            message VARCHAR(10000) NOT NULL
+            message VARCHAR(10000) NOT NULL,
+            app VARCHAR(10) NOT NULL
         )
     """
 
@@ -39,16 +40,16 @@ def createTable(database):
         print(e)
 
 
-def insertMessage(database, month, day, year, hour, minute, AMPM, person, message):
+def insertMessage(database, month, day, year, hour, minute, AMPM, person, message, app):
     sql = """
-        INSERT INTO Messages(month, day, year, hour, minute, AMPM, person, message)
-        VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO Messages(month, day, year, hour, minute, AMPM, person, message, app)
+        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)
     """
 
     try:
         with database:
             cursor = database.cursor()
-            cursor.execute(sql, (month, day, year, hour, minute, AMPM, person, message))
+            cursor.execute(sql, (month, day, year, hour, minute, AMPM, person, message, app))
     except sqlite3.Error as e:
         print(e)
 
@@ -63,32 +64,54 @@ def selectAllMessages(database):
         print(e)
 
 
-def selectLastMessage(database):
-    sql = "SELECT * FROM Messages ORDER BY IdMes DESC LIMIT 1"
+def selectLastMessage(database, app):
+    sql = "SELECT * FROM Messages WHERE app = ? ORDER BY IdMes DESC LIMIT 1"
     try:
         cursor = database.cursor()
-        cursor.execute(sql)
+        cursor.execute(sql, (app, ))
         return cursor.fetchone()
     except sqlite3.Error as e:
         print(e)
 
 
-def selectLastMessageText(database):
-    sql = "SELECT message FROM Messages ORDER BY IdMes DESC LIMIT 1"
+def selectLastMessageText(database, app):
+    sql = "SELECT message FROM Messages WHERE app = ? ORDER BY IdMes DESC LIMIT 1"
     try:
         cursor = database.cursor()
-        cursor.execute(sql)
+        cursor.execute(sql, (app, ))
         return cursor.fetchone()
     except sqlite3.Error as e:
         print(e)
 
 
-def updateLastMessage(database, message):
-    sql = "UPDATE Messages SET message = ? WHERE IdMes = (SELECT IdMes FROM Messages ORDER BY IdMes DESC LIMIT 1)"
+def updateLastMessage(database, message, app):
+    sql = "UPDATE Messages SET message = ? WHERE IdMes = (SELECT IdMes FROM Messages WHERE app = ? ORDER BY IdMes DESC LIMIT 1)"
     try:
         with database:
             cursor = database.cursor()
-            cursor.execute(sql, (message, ))
+            cursor.execute(sql, (message, app))
     except sqlite3.Error as e:
         print(e)
 
+
+def getAllPersons(database):
+    sql = "SELECT DISTINCT person FROM Messages"
+    try:
+        with database:
+            cursor = database.cursor()
+            cursor.execute(sql)
+            persons = cursor.fetchall()
+            return [person[0] for person in persons]
+    except sqlite3.Error as e:
+        print(e)
+        return []
+
+
+def updatePersonName(database, newName, oldName):
+    sql = "UPDATE Messages SET person = ? WHERE person = ?"
+    try:
+        with database:
+            cursor = database.cursor()
+            cursor.execute(sql, (newName, oldName))
+    except sqlite3.Error as e:
+        print(e)

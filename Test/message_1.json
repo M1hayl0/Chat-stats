@@ -1,0 +1,72 @@
+{
+  "participants": [
+    {
+      "name": "person1"
+    },
+    {
+      "name": "person2"
+    }
+  ],
+  "messages": [
+    {
+      "sender_name": "person1",
+      "timestamp_ms": 1720030796502,
+      "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+      "is_geoblocked_for_viewer": false
+    },
+    {
+      "sender_name": "person1",
+      "timestamp_ms": 1720030761757,
+      "content": "Urna et pharetra pharetra massa massa. \u00f0\u009f\u0098\u0080",
+      "is_geoblocked_for_viewer": false
+    },
+    {
+      "sender_name": "person1",
+      "timestamp_ms": 1720030720605,
+      "content": "Nunc congue nisi vitae suscipit tellus mauris a. Eu feugiat pretium nibh ipsum consequat nisl vel pretium. \u00f0\u009f\u0098\u0080",
+      "is_geoblocked_for_viewer": false
+    },
+    {
+      "sender_name": "person2",
+      "timestamp_ms": 1720030706163,
+      "content": "Duis at tellus at urna condimentum mattis pellentesque id.",
+      "is_geoblocked_for_viewer": false
+    },
+    {
+      "sender_name": "person2",
+      "timestamp_ms": 1720030532243,
+      "content": "Vitae tortor condimentum lacinia quis.",
+      "is_geoblocked_for_viewer": false
+    },
+    {
+      "sender_name": "person2",
+      "timestamp_ms": 1720030461517,
+      "content": "Massa ultricies mi quis hendrerit dolor.",
+      "is_geoblocked_for_viewer": false
+    },
+    {
+      "sender_name": "person2",
+      "timestamp_ms": 1720030353421,
+      "content": "Adipiscing elit ut aliquam purus sit amet luctus venenatis.",
+      "is_geoblocked_for_viewer": false
+    },
+    {
+      "sender_name": "person1",
+      "timestamp_ms": 1720030338431,
+      "content": "Lacinia at quis risus sed.",
+      "is_geoblocked_for_viewer": false
+    },
+    {
+      "sender_name": "person1",
+      "timestamp_ms": 1720030240772,
+      "content": "Ut faucibus pulvinar elementum integer enim neque volutpat ac tincidunt.",
+      "is_geoblocked_for_viewer": false
+    }
+  ],
+  "title": "person2",
+  "is_still_participant": true,
+  "thread_path": "inbox/person2",
+  "magic_words": [
+  
+  ]
+}

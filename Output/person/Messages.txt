@@ -1,33 +1,32 @@
 Messages per year: 
-2022: 19
+2024: 28
 
 Messages per month: 
-10/2022: 3
-11/2022: 13
-12/2022: 3
+06/2024: 2
+07/2024: 26
 
 Messages per day: 
-30/10/2022: 3
-02/11/2022: 10
-03/11/2022: 2
-04/11/2022: 1
-06/12/2022: 3
+04/06/2024: 2
+03/07/2024: 9
+04/07/2024: 2
+05/07/2024: 2
+09/07/2024: 13
 
 Days with most messages: 
-02/11/2022: 10
-30/10/2022: 3
-06/12/2022: 3
-03/11/2022: 2
-04/11/2022: 1
+09/07/2024: 13
+03/07/2024: 9
+04/06/2024: 2
+04/07/2024: 2
+05/07/2024: 2
 
 Messages per day of the week: 
 Monday: 0
-Tuesday: 3
-Wednesday: 10
+Tuesday: 15
+Wednesday: 9
 Thursday: 2
-Friday: 1
+Friday: 2
 Saturday: 0
-Sunday: 3
+Sunday: 0
 
 Messages per hour of day: 
 12AM: 10
@@ -50,7 +49,7 @@ Messages per hour of day:
 5PM: 0
 6PM: 0
 7PM: 0
-8PM: 0
+8PM: 9
 9PM: 0
 10PM: 0
 11PM: 0

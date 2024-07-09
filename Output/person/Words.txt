@@ -1,24 +1,22 @@
 Number of words: 
-27: lorem
-19: nulla
-17: ipsum
-15: ac
-12: non, tellus
-11: consequat
-10: eros, cursus
+28: lorem
+19: ipsum, nulla
+16: ac
+14: tellus
+12: non, consequat
+10: eros, eu, cursus, tortor, vel
 
 Number of words per user: 
 Person 2:
 18: nulla
-12: ac
-11: tellus
-10: cursus
+12: ac, tellus
+10: cursus, tortor
 
 Person 1:
-18: lorem
-16: ipsum
+19: lorem
+18: ipsum
 
 Number of unique words per user: 
-Person 2: 138
-Person 1: 110
+Person 2: 153
+Person 1: 138
 

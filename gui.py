@@ -4,16 +4,18 @@ from PySide6.QtWidgets import QApplication, QFileDialog, QVBoxLayout, QPushButto
     QHBoxLayout, QTabWidget, QTextEdit, QListWidget, QMessageBox, QDialog
 from PySide6.QtCore import QSize, Qt, QThread, Signal
 import os
+import json
 
 from data import dataProcessing
-from input import addToDatabase
+from input import addToDatabaseWa, addToDatabaseInsta, removeOldFiles
+from sql import *
 
 
 class MyApp(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("WhatsApp Stats")
+        self.setWindowTitle("Chat Stats")
         self.setFixedSize(QSize(800, 600))
         self.setStyleSheet("background-color: #25d366;")
         self.initDialog()
@@ -26,7 +28,8 @@ class MyApp(QWidget):
             "General": self.initGeneralTab,
             "Messages": self.initMessagesTab,
             "Words": self.initWordsTab,
-            "Emojis": self.initEmojisTab
+            "Emojis": self.initEmojisTab,
+            "Change names": self.initChangeNamesTab
         }
 
         for tabName, initMethod in self.tabWidgets.items():
@@ -55,14 +58,21 @@ class MyApp(QWidget):
         self.chatNameInputBox.addWidget(self.chatNameLabel, alignment=Qt.AlignCenter)
         self.chatNameInputBox.addWidget(self.chatNameInput, alignment=Qt.AlignCenter)
 
-        self.importFileButton = QPushButton("Import Chat")
-        self.importFileButton.setFixedSize(QSize(150, 60))
-        self.importFileButton.clicked.connect(self.openFile)
-        self.importFileButton.setFont(QFont("Helvetica", 16))
-        self.importFileButton.setStyleSheet("color: #FFFFFF; background-color: #25d366;")
+        self.importFileButtonWa = QPushButton("Import Wa Chat")
+        self.importFileButtonWa.setFixedSize(QSize(200, 60))
+        self.importFileButtonWa.clicked.connect(self.openFileWa)
+        self.importFileButtonWa.setFont(QFont("Helvetica", 16))
+        self.importFileButtonWa.setStyleSheet("color: #FFFFFF; background-color: #25d366;")
+
+        self.importFileButtonInsta = QPushButton("Import Insta Chat")
+        self.importFileButtonInsta.setFixedSize(QSize(200, 60))
+        self.importFileButtonInsta.clicked.connect(self.openFileInsta)
+        self.importFileButtonInsta.setFont(QFont("Helvetica", 16))
+        self.importFileButtonInsta.setStyleSheet("color: #FFFFFF; background-color: #25d366;")
 
         self.importFileBox = QHBoxLayout()
-        self.importFileBox.addWidget(self.importFileButton, alignment=Qt.AlignCenter)
+        self.importFileBox.addWidget(self.importFileButtonWa, alignment=Qt.AlignCenter)
+        self.importFileBox.addWidget(self.importFileButtonInsta, alignment=Qt.AlignCenter)
 
         self.tabInputLayout = QVBoxLayout(tabInput)
         self.tabInputLayout.addLayout(self.chatNameInputBox)
@@ -134,12 +144,60 @@ class MyApp(QWidget):
         self.tabEmojisLayout = QVBoxLayout(tabEmojis)
         self.tabEmojisLayout.addWidget(self.textEditEmojis)
 
+    def initChangeNamesTab(self, tabChangeNames):
+        self.changeNamesInput = QLineEdit()
+        self.changeNamesInput.setFixedSize(QSize(300, 50))
+        self.changeNamesInput.setFont(QFont("Helvetica", 16))
+        self.changeNamesInput.setStyleSheet("color: #FFFFFF; background-color: #25d366;")
+        self.changeNamesInput.setPlaceholderText("Enter name to change here")
+
+        self.changeNamesButton = QPushButton('Change Names')
+        self.changeNamesButton.setFixedSize(QSize(200, 50))
+        self.changeNamesButton.clicked.connect(self.changeName)
+        self.changeNamesButton.setFont(QFont("Helvetica", 16))
+        self.changeNamesButton.setStyleSheet("color: #FFFFFF; background-color: #25d366;")
+
+        self.changeNamesButtonInput = QHBoxLayout()
+        self.changeNamesButtonInput.addWidget(self.changeNamesInput, alignment=Qt.AlignCenter)
+        self.changeNamesButtonInput.addWidget(self.changeNamesButton, alignment=Qt.AlignCenter)
+
+        self.changeNamesList = QListWidget()
+        self.changeNamesList.setFont(QFont("Helvetica", 12))
+
+        for i in range(self.changeNamesList.count()):
+            self.changeNamesList.item(i).setBackground(QColor('#25d366'))
+
+        self.changeNamesList.setStyleSheet("""
+            QListWidget::item { min-height: 50px; color: #FFFFFF; };
+        """)
+        self.changeNamesList.itemSelectionChanged.connect(self.updateItemColors2)
+
+        self.tabChangeNamesLayout = QVBoxLayout(tabChangeNames)
+        self.tabChangeNamesLayout.addWidget(self.changeNamesList)
+        self.tabChangeNamesLayout.addLayout(self.changeNamesButtonInput)
+
+    def updateChangeNamesTab(self, users):
+        self.changeNamesList.clear()
+        for user in users:
+            self.changeNamesList.addItem(user)
+        self.updateItemColors2()
+
+    def updateItemColors2(self):
+        for i in range(self.changeNamesList.count()):
+            item = self.changeNamesList.item(i)
+            if item.isSelected():
+                item.setBackground(QColor('#075e54'))
+                item.setFont(QFont("Helvetica", 15))
+            else:
+                item.setBackground(QColor('#25d366'))
+                item.setFont(QFont("Helvetica", 12))
+
     def initDialog(self):
         self.importDialog = QDialog(self)
         self.importDialog.setWindowFlags(self.importDialog.windowFlags() & ~Qt.WindowCloseButtonHint)
         self.importDialog.setFixedSize(QSize(200, 100))
         self.importDialog.setStyleSheet("background-color: #ece5dd;")
-        self.importDialog.setWindowTitle("WhatsApp Stats")
+        self.importDialog.setWindowTitle("Chat Stats")
         importDialogLayout = QVBoxLayout()
         self.importDialogText = QLabel("Importing data...")
         self.importDialogText.setFont(QFont("Helvetica", 12))
@@ -151,7 +209,7 @@ class MyApp(QWidget):
         self.runDialog.setWindowFlags(self.runDialog.windowFlags() & ~Qt.WindowCloseButtonHint)
         self.runDialog.setFixedSize(QSize(200, 100))
         self.runDialog.setStyleSheet("background-color: #ece5dd;")
-        self.runDialog.setWindowTitle("WhatsApp Stats")
+        self.runDialog.setWindowTitle("Chat Stats")
         runDialogLayout = QVBoxLayout()
         self.runDialogText = QLabel("Data processing...")
         self.runDialogText.setFont(QFont("Helvetica", 12))
@@ -159,7 +217,7 @@ class MyApp(QWidget):
         runDialogLayout.addWidget(self.runDialogText, alignment=Qt.AlignCenter)
         self.runDialog.setLayout(runDialogLayout)
 
-    def openFile(self):
+    def openFileWa(self):
         options = QFileDialog.Options()
         options |= QFileDialog.ReadOnly
         fileName, _ = QFileDialog.getOpenFileName(self, "Import File", "D:", "Files (*.txt)", options=options)
@@ -168,10 +226,27 @@ class MyApp(QWidget):
                 data = f.read()
                 chat = self.chatNameInput.text()
                 if not os.path.exists(f"Input/{chat}.db"):
-                    self.dbWorker = addToDatabaseWorker(chat, data, True)
+                    self.dbWorker = addToDatabaseWorker(chat, data, True, "wa")
                 else:
                     self.removeFromChatList(chat)
-                    self.dbWorker = addToDatabaseWorker(chat, data, False)
+                    self.dbWorker = addToDatabaseWorker(chat, data, False, "wa")
+                self.dbWorker.finished.connect(self.addToChatList)
+                self.dbWorker.start()
+                self.importDialog.show()
+
+    def openFileInsta(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.ReadOnly
+        fileName, _ = QFileDialog.getOpenFileName(self, "Import File", "D:", "Files (*.json)", options=options)
+        if fileName:
+            with open(fileName, 'r', encoding="utf8") as f:
+                data = json.load(f)
+                chat = self.chatNameInput.text()
+                if not os.path.exists(f"Input/{chat}.db"):
+                    self.dbWorker = addToDatabaseWorker(chat, data, True, "insta")
+                else:
+                    self.removeFromChatList(chat)
+                    self.dbWorker = addToDatabaseWorker(chat, data, False, "insta")
                 self.dbWorker.finished.connect(self.addToChatList)
                 self.dbWorker.start()
                 self.importDialog.show()
@@ -193,6 +268,11 @@ class MyApp(QWidget):
         self.runDialog.show()
 
     def output(self, chat):
+        database = connect(chat)
+        persons = getAllPersons(database)
+        self.updateChangeNamesTab(persons)
+        self.chat = chat
+        disconnect(database)
         with open(f"Output/{chat}/General.txt", "r", encoding="utf8") as outputFileGeneral:
             data = outputFileGeneral.read()
             self.textEditGeneral.setText(data)
@@ -206,6 +286,16 @@ class MyApp(QWidget):
             data = outputFileEmojis.read()
             self.textEditEmojis.setText(data)
         self.runDialog.close()
+
+    def changeName(self):
+        removeOldFiles(self.chat)
+        oldName = self.changeNamesList.selectedItems()[0].text()
+        newName = self.changeNamesInput.text()
+        database = connect(self.chat)
+        updatePersonName(database, newName, oldName)
+        persons = getAllPersons(database)
+        self.updateChangeNamesTab(persons)
+        disconnect(database)
 
 
 class dataProcessingWorker(QThread):
@@ -223,12 +313,16 @@ class dataProcessingWorker(QThread):
 class addToDatabaseWorker(QThread):
     finished = Signal(str)
 
-    def __init__(self, chat, data, first):
+    def __init__(self, chat, data, first, app):
         super().__init__()
         self.chat = chat
         self.data = data
         self.first = first
+        self.app = app
 
     def run(self):
-        addToDatabase(self.chat, self.data, self.first)
+        if self.app == "wa":
+            addToDatabaseWa(self.chat, self.data, self.first)
+        elif self.app == "insta":
+            addToDatabaseInsta(self.chat, self.data, self.first)
         self.finished.emit(self.chat)

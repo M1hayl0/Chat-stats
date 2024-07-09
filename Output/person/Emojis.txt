@@ -1,14 +1,16 @@
 Emojis: 
 🙃 : 3
+😀 : 2
 ❤️ : 2
 
 Number of emojis per user: 
-Person 1: 3
+Person 1: 5
 Person 2: 2
 
 Emojis per user: 
 Person 1:
 🙃 : 3
+😀 : 2
 
 Person 2:
 ❤️ : 2

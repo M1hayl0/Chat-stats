@@ -15,7 +15,7 @@ def dataProcessing(chat):
     messagesNum, wordsNum, lettersNum, mediaNum, emojisNum = 0, 0, 0, 0, 0
     perUser, days, months, years, words, emojis = {}, {}, {}, {}, {}, {}
     dayOfTheWeek, hourOfTheDay = [0] * 7, [0] * 24
-    firstMessage, lastMessage = {}, {}
+    firstMessage, lastMessage, firstMessageDate, lastMessageDate = {}, {}, {}, {}
     dates, maxWith, maxWithout = [], 0, 0
 
     database = connect(chat)
@@ -36,7 +36,7 @@ def dataProcessing(chat):
                 else:
                     words[word.lower()] += 1
 
-            lettersNum += sum(len(x) for x in messageSplit)
+            lettersNum += len(mes["message"])
 
             emojiList = [demojize(x["emoji"]) for x in emoji.emoji_list(mes["message"])]
             if len(emojiList) > 0:
@@ -80,7 +80,7 @@ def dataProcessing(chat):
                     perUserPerson[6][word.lower()] = 1
                 else:
                     perUserPerson[6][word.lower()] += 1
-            perUserPerson[2] += sum(len(x) for x in messageSplit)
+            perUserPerson[2] += len(mes["message"])
 
             emojiList = [demojize(x["emoji"]) for x in emoji.emoji_list(mes["message"])]
             if len(emojiList) > 0:
@@ -102,12 +102,24 @@ def dataProcessing(chat):
 
         if mes["person"] not in firstMessage:
             firstMessage[mes["person"]] = f"{mes['day']}/{mes['month']}/{mes['year']} {mes['hour']}:{mes['minute']}{mes['AM/PM']}"
+            firstMessageDate[mes["person"]] = date
             lastMessage[mes["person"]] = f"{mes['day']}/{mes['month']}/{mes['year']} {mes['hour']}:{mes['minute']}{mes['AM/PM']}"
+            lastMessageDate[mes["person"]] = date
         else:
-            lastMessage[mes["person"]] = f"{mes['day']}/{mes['month']}/{mes['year']} {mes['hour']}:{mes['minute']}{mes['AM/PM']}"
+            if firstMessageDate[mes["person"]] > date:
+                firstMessage[mes["person"]] = f"{mes['day']}/{mes['month']}/{mes['year']} {mes['hour']}:{mes['minute']}{mes['AM/PM']}"
+                firstMessageDate[mes["person"]] = date
+            if lastMessageDate[mes["person"]] < date:
+                lastMessage[mes["person"]] = f"{mes['day']}/{mes['month']}/{mes['year']} {mes['hour']}:{mes['minute']}{mes['AM/PM']}"
+                lastMessageDate[mes["person"]] = date
 
         if date not in dates:
             dates.append(date)
+
+    dates = sorted(dates)
+    days = {k: days[k] for k in sorted(days, key=lambda x: datetime.datetime.strptime(x, "%d/%m/%Y"))}
+    months = {k: months[k] for k in sorted(months, key=lambda x: datetime.datetime.strptime(x, "%m/%Y"))}
+    years = {k: years[k] for k in sorted(years, key=lambda x: datetime.datetime.strptime(x, "%Y"))}
 
     cur = 1
     for i in range(1, len(dates)):

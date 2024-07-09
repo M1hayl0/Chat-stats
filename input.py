@@ -1,5 +1,6 @@
 import re
 import os
+import datetime
 
 from sql import *
 
@@ -11,21 +12,24 @@ def removeOldFiles(chat):
             os.remove(file)
 
 
-def addToDatabase(chat, data, first):
+def addToDatabaseWa(chat, data, first):
     removeOldFiles(chat)
 
     database = connect(chat)
     if first:
         createTable(database)
     if not first:
-        lastMessage = selectLastMessage(database)
-        lineFound = False
+        lastMessage = selectLastMessage(database, "wa")
         lastLine = ""
+        if not lastMessage:
+            lineFound = True
+        else:
+            lineFound = False
     for line in data.split('\n'):
         reg = re.compile("([0-9]+)/([0-9]+)/([0-9]+), ([0-9]+):([0-9]+)\u202f(.{2}) - (.[^:]+): (.+)").match(line)
         if not first:
             if not lineFound:
-                if reg and all(lastMessage[i] == reg.group(i) for i in range(1, 9)):
+                if reg and all(lastMessage[i] == reg.group(i) for i in range(1, 9)) and lastMessage[-1] == "wa":
                     lineFound = True
                     continue
                 elif not reg and re.compile("([0-9]+)/([0-9]+)/([0-9]+), (.+) - (.+)").match(line):
@@ -37,7 +41,7 @@ def addToDatabase(chat, data, first):
                     # When a message has more lines
                     lastLine += '\n' + line.strip()
                     reg = re.compile("([0-9]+)/([0-9]+)/([0-9]+), ([0-9]+):([0-9]+)\u202f(.{2}) - (.[^:]+): (.+)").match(lastLine)
-                    if reg and all(lastMessage[i] == reg.group(i) for i in range(1, 9)):
+                    if reg and all(lastMessage[i] == reg.group(i) for i in range(1, 9)) and lastMessage[-1] == "wa":
                         lineFound = True
                     continue
                 elif reg:
@@ -47,7 +51,7 @@ def addToDatabase(chat, data, first):
         if reg:
             if reg.group(6) == "This message was deleted":
                 continue
-            insertMessage(database, *[reg.group(i) for i in range(1, 9)])
+            insertMessage(database, *[reg.group(i) for i in range(1, 9)], "wa")
         elif re.compile("([0-9]+)/([0-9]+)/([0-9]+), (.+) - (.+)").match(line):
             # Skip lines like this:
             # 10/30/22, 9:08 AM - Person1 added Person2
@@ -55,6 +59,58 @@ def addToDatabase(chat, data, first):
             continue
         elif line != "":
             # When a message has more lines
-            updateLastMessage(database, selectLastMessageText(database)[0] + '\n' + line.strip())
+            updateLastMessage(database, selectLastMessageText(database, "wa")[0] + '\n' + line.strip(), "wa")
             continue
+    disconnect(database)
+
+
+def addToDatabaseInsta(chat, data, first):
+    removeOldFiles(chat)
+    database = connect(chat)
+
+    if first:
+        createTable(database)
+    if not first:
+        lastMessage = selectLastMessage(database, "insta")
+        if not lastMessage:
+            lineFound = True
+        else:
+            lineFound = False
+    for mes in data["messages"]:
+        # when a person likes your message, a message is added for them saying that your message has been liked, skip those messages
+        # the text of this message is in my language because that's how I found it in some chat, it probably can be in any other language but there is no smart way I can solve it because the data for it is same as the data for a regular message
+        # if the person you are chatting with has much more messages than you, try changing this string
+        if "content" in mes and mes["content"] == "\u00d0\u00a1\u00d0\u00b2\u00d0\u00b8\u00d1\u0092\u00d0\u00b0 \u00d0\u00bc\u00d1\u0083/\u00d1\u0098\u00d0\u00be\u00d1\u0098 \u00d1\u0081\u00d0\u00b5 \u00d0\u00bf\u00d0\u00be\u00d1\u0080\u00d1\u0083\u00d0\u00ba\u00d0\u00b0":
+            continue
+
+        timestamp_s = mes["timestamp_ms"] / 1000
+        utcDt = datetime.datetime.fromtimestamp(timestamp_s, datetime.timezone.utc)
+        utcPlus2 = datetime.timezone(datetime.timedelta(hours=2))
+        localizedDt = utcDt.astimezone(utcPlus2)
+
+        month = str(localizedDt.month)
+        day = str(localizedDt.day)
+        year = str(localizedDt.year % 100).zfill(2)
+        hour = localizedDt.hour if localizedDt.hour <= 12 else localizedDt.hour - 12  # correct time only for UTC+2 timezone
+        if hour == 0:
+            hour = 12
+        hour = str(hour)
+        minute = str(localizedDt.minute).zfill(2)
+        AMPM = "AM" if localizedDt.hour < 12 else "PM"
+
+        person = mes["sender_name"].encode('latin1').decode('utf-8')
+        if "content" in mes:
+            message = mes["content"]
+            message = message.encode('latin1').decode('utf-8')
+        elif "photos" in mes:
+            message = "<Media omitted>"
+
+        data = [month, day, year, hour, minute, AMPM, person, message, "insta"]
+        if not first and not lineFound:
+            if all(lastMessage[i] == data[i - 1] for i in range(1, 10)):
+                lineFound = True
+                continue
+        else:
+            insertMessage(database, *data)
+
     disconnect(database)
