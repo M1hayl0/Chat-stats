@@ -226,10 +226,10 @@ class MyApp(QWidget):
                 data = f.read()
                 chat = self.chatNameInput.text()
                 if not os.path.exists(f"Input/{chat}.db"):
-                    self.dbWorker = addToDatabaseWorker(chat, data, True, "wa")
+                    self.dbWorker = addToDatabaseWorker(chat, data, True, True, "wa")
                 else:
                     self.removeFromChatList(chat)
-                    self.dbWorker = addToDatabaseWorker(chat, data, False, "wa")
+                    self.dbWorker = addToDatabaseWorker(chat, data, False, False, "wa")
                 self.dbWorker.finished.connect(self.addToChatList)
                 self.dbWorker.start()
                 self.importDialog.show()
@@ -243,10 +243,10 @@ class MyApp(QWidget):
                 data = json.load(f)
                 chat = self.chatNameInput.text()
                 if not os.path.exists(f"Input/{chat}.db"):
-                    self.dbWorker = addToDatabaseWorker(chat, data, True, "insta")
+                    self.dbWorker = addToDatabaseWorker(chat, data, True, True, "insta")
                 else:
                     self.removeFromChatList(chat)
-                    self.dbWorker = addToDatabaseWorker(chat, data, False, "insta")
+                    self.dbWorker = addToDatabaseWorker(chat, data, False, False, "insta")
                 self.dbWorker.finished.connect(self.addToChatList)
                 self.dbWorker.start()
                 self.importDialog.show()
@@ -313,16 +313,17 @@ class dataProcessingWorker(QThread):
 class addToDatabaseWorker(QThread):
     finished = Signal(str)
 
-    def __init__(self, chat, data, first, app):
+    def __init__(self, chat, data, first, createTableBool, app):
         super().__init__()
         self.chat = chat
         self.data = data
         self.first = first
+        self.createTableBool = createTableBool
         self.app = app
 
     def run(self):
         if self.app == "wa":
-            addToDatabaseWa(self.chat, self.data, self.first)
+            addToDatabaseWa(self.chat, self.data, self.first, self.createTableBool)
         elif self.app == "insta":
-            addToDatabaseInsta(self.chat, self.data, self.first)
+            addToDatabaseInsta(self.chat, self.data, self.first, self.createTableBool)
         self.finished.emit(self.chat)

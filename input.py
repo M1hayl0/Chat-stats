@@ -12,41 +12,40 @@ def removeOldFiles(chat):
             os.remove(file)
 
 
-def addToDatabaseWa(chat, data, first):
+def addToDatabaseWa(chat, data, first, createTableBool):
     removeOldFiles(chat)
 
     database = connect(chat)
-    if first:
+    if createTableBool:
         createTable(database)
     if not first:
         lastMessage = selectLastMessage(database, "wa")
         lastLine = ""
         if not lastMessage:
-            lineFound = True
+            first = True
         else:
             lineFound = False
     for line in data.split('\n'):
         reg = re.compile("([0-9]+)/([0-9]+)/([0-9]+), ([0-9]+):([0-9]+)\u202f(.{2}) - (.[^:]+): (.+)").match(line)
-        if not first:
-            if not lineFound:
+        if not first and not lineFound:
+            if reg and all(lastMessage[i] == reg.group(i) for i in range(1, 9)) and lastMessage[-1] == "wa":
+                lineFound = True
+                continue
+            elif not reg and re.compile("([0-9]+)/([0-9]+)/([0-9]+), (.+) - (.+)").match(line):
+                # Skip lines like this:
+                # 10/30/22, 9:08 AM - Person1 added Person2
+                # 12/15/22, 5:46 PM - Messages and calls are end-to-end encrypted. No one outside of this chat, not even WhatsApp, can read or listen to them. Tap to learn more.
+                continue
+            elif not reg:
+                # When a message has more lines
+                lastLine += '\n' + line.strip()
+                reg = re.compile("([0-9]+)/([0-9]+)/([0-9]+), ([0-9]+):([0-9]+)\u202f(.{2}) - (.[^:]+): (.+)").match(lastLine)
                 if reg and all(lastMessage[i] == reg.group(i) for i in range(1, 9)) and lastMessage[-1] == "wa":
                     lineFound = True
-                    continue
-                elif not reg and re.compile("([0-9]+)/([0-9]+)/([0-9]+), (.+) - (.+)").match(line):
-                    # Skip lines like this:
-                    # 10/30/22, 9:08 AM - Person1 added Person2
-                    # 12/15/22, 5:46 PM - Messages and calls are end-to-end encrypted. No one outside of this chat, not even WhatsApp, can read or listen to them. Tap to learn more.
-                    continue
-                elif not reg:
-                    # When a message has more lines
-                    lastLine += '\n' + line.strip()
-                    reg = re.compile("([0-9]+)/([0-9]+)/([0-9]+), ([0-9]+):([0-9]+)\u202f(.{2}) - (.[^:]+): (.+)").match(lastLine)
-                    if reg and all(lastMessage[i] == reg.group(i) for i in range(1, 9)) and lastMessage[-1] == "wa":
-                        lineFound = True
-                    continue
-                elif reg:
-                    lastLine = line
-                    continue
+                continue
+            elif reg:
+                lastLine = line
+                continue
 
         if reg:
             if reg.group(6) == "This message was deleted":
@@ -63,17 +62,20 @@ def addToDatabaseWa(chat, data, first):
             continue
     disconnect(database)
 
+    if not first and not lineFound:
+        addToDatabaseInsta(chat, data, True, False)
 
-def addToDatabaseInsta(chat, data, first):
+
+def addToDatabaseInsta(chat, data, first, createTableBool):
     removeOldFiles(chat)
     database = connect(chat)
 
-    if first:
+    if createTableBool:
         createTable(database)
     if not first:
         lastMessage = selectLastMessage(database, "insta")
         if not lastMessage:
-            lineFound = True
+            first = True
         else:
             lineFound = False
     for mes in data["messages"]:
@@ -105,12 +107,15 @@ def addToDatabaseInsta(chat, data, first):
         elif "photos" in mes:
             message = "<Media omitted>"
 
-        data = [month, day, year, hour, minute, AMPM, person, message, "insta"]
+        data2 = [month, day, year, hour, minute, AMPM, person, message, "insta"]
         if not first and not lineFound:
-            if all(lastMessage[i] == data[i - 1] for i in range(1, 10)):
+            if all(lastMessage[i] == data2[i - 1] for i in range(1, 10)):
                 lineFound = True
                 continue
         else:
-            insertMessage(database, *data)
+            insertMessage(database, *data2)
 
     disconnect(database)
+
+    if not first and not lineFound:
+        addToDatabaseInsta(chat, data, True, False)
