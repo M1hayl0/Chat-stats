@@ -7,7 +7,7 @@ import os
 import json
 
 from data import dataProcessing
-from input import addToDatabaseWa, addToDatabaseInsta, removeOldFiles
+from input import addToDatabaseWa, addToDatabaseInstaMes, removeOldFiles
 from sql import *
 
 
@@ -59,20 +59,20 @@ class MyApp(QWidget):
         self.chatNameInputBox.addWidget(self.chatNameInput, alignment=Qt.AlignCenter)
 
         self.importFileButtonWa = QPushButton("Import Wa Chat")
-        self.importFileButtonWa.setFixedSize(QSize(200, 60))
+        self.importFileButtonWa.setFixedSize(QSize(300, 60))
         self.importFileButtonWa.clicked.connect(self.openFileWa)
         self.importFileButtonWa.setFont(QFont("Helvetica", 16))
         self.importFileButtonWa.setStyleSheet("color: #FFFFFF; background-color: #25d366;")
 
-        self.importFileButtonInsta = QPushButton("Import Insta Chat")
-        self.importFileButtonInsta.setFixedSize(QSize(200, 60))
-        self.importFileButtonInsta.clicked.connect(self.openFileInsta)
-        self.importFileButtonInsta.setFont(QFont("Helvetica", 16))
-        self.importFileButtonInsta.setStyleSheet("color: #FFFFFF; background-color: #25d366;")
+        self.importFileButtonInstaMes = QPushButton("Import Instagram or Messenger Chat")
+        self.importFileButtonInstaMes.setFixedSize(QSize(300, 60))
+        self.importFileButtonInstaMes.clicked.connect(self.openFileInstaMes)
+        self.importFileButtonInstaMes.setFont(QFont("Helvetica", 12))
+        self.importFileButtonInstaMes.setStyleSheet("color: #FFFFFF; background-color: #25d366;")
 
         self.importFileBox = QHBoxLayout()
         self.importFileBox.addWidget(self.importFileButtonWa, alignment=Qt.AlignCenter)
-        self.importFileBox.addWidget(self.importFileButtonInsta, alignment=Qt.AlignCenter)
+        self.importFileBox.addWidget(self.importFileButtonInstaMes, alignment=Qt.AlignCenter)
 
         self.tabInputLayout = QVBoxLayout(tabInput)
         self.tabInputLayout.addLayout(self.chatNameInputBox)
@@ -234,7 +234,7 @@ class MyApp(QWidget):
                 self.dbWorker.start()
                 self.importDialog.show()
 
-    def openFileInsta(self):
+    def openFileInstaMes(self):
         options = QFileDialog.Options()
         options |= QFileDialog.ReadOnly
         fileName, _ = QFileDialog.getOpenFileName(self, "Import File", "D:", "Files (*.json)", options=options)
@@ -243,10 +243,10 @@ class MyApp(QWidget):
                 data = json.load(f)
                 chat = self.chatNameInput.text()
                 if not os.path.exists(f"Input/{chat}.db"):
-                    self.dbWorker = addToDatabaseWorker(chat, data, True, True, "insta")
+                    self.dbWorker = addToDatabaseWorker(chat, data, True, True, "insta/mes")
                 else:
                     self.removeFromChatList(chat)
-                    self.dbWorker = addToDatabaseWorker(chat, data, False, False, "insta")
+                    self.dbWorker = addToDatabaseWorker(chat, data, False, False, "insta/mes")
                 self.dbWorker.finished.connect(self.addToChatList)
                 self.dbWorker.start()
                 self.importDialog.show()
@@ -324,6 +324,6 @@ class addToDatabaseWorker(QThread):
     def run(self):
         if self.app == "wa":
             addToDatabaseWa(self.chat, self.data, self.first, self.createTableBool)
-        elif self.app == "insta":
-            addToDatabaseInsta(self.chat, self.data, self.first, self.createTableBool)
+        elif self.app == "insta/mes":
+            addToDatabaseInstaMes(self.chat, self.data, self.first, self.createTableBool)
         self.finished.emit(self.chat)

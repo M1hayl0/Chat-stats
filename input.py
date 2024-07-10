@@ -63,17 +63,17 @@ def addToDatabaseWa(chat, data, first, createTableBool):
     disconnect(database)
 
     if not first and not lineFound:
-        addToDatabaseInsta(chat, data, True, False)
+        addToDatabaseWa(chat, data, True, False)
 
 
-def addToDatabaseInsta(chat, data, first, createTableBool):
+def addToDatabaseInstaMes(chat, data, first, createTableBool):
     removeOldFiles(chat)
     database = connect(chat)
 
     if createTableBool:
         createTable(database)
     if not first:
-        lastMessage = selectLastMessage(database, "insta")
+        lastMessage = selectLastMessage(database, "insta/mes")
         if not lastMessage:
             first = True
         else:
@@ -107,7 +107,7 @@ def addToDatabaseInsta(chat, data, first, createTableBool):
         elif "photos" in mes:
             message = "<Media omitted>"
 
-        data2 = [month, day, year, hour, minute, AMPM, person, message, "insta"]
+        data2 = [month, day, year, hour, minute, AMPM, person, message, "insta/mes"]
         if not first and not lineFound:
             if all(lastMessage[i] == data2[i - 1] for i in range(1, 10)):
                 lineFound = True
@@ -118,4 +118,4 @@ def addToDatabaseInsta(chat, data, first, createTableBool):
     disconnect(database)
 
     if not first and not lineFound:
-        addToDatabaseInsta(chat, data, True, False)
+        addToDatabaseInstaMes(chat, data, True, False)
